@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#ffd23f">
-<title>How Gee Is Voting</title>
-<meta name="description" content="A friendly cheat sheet for how Gee is voting this November.">
+<title>How Gee Is Voting · Nov 2026 General Election</title>
+<meta name="description" content="A friendly cheat sheet for how Gee is voting in the November 2026 General Election.">
 <style>
   :root {
     --bg: #fff4d6;
@@ -148,8 +148,9 @@
    ============================================================ */
 const SITE = {
   title: "How Gee Is Voting",
+  tabTitle: "How Gee Is Voting · Nov 2026 General Election",
   subtitle: "A cheat sheet for the polling place. No pressure. (Some pressure.)",
-  date: "Election Day · Tuesday, Nov 3, 2026",
+  date: "November 2026 General Election · Tuesday, Nov 3",
   mascot: "🗳️",
   footnote: "Made with love and mild civic panic. Please do your own research, too!",
 };
@@ -363,7 +364,7 @@ try { checks = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) {}
 const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(checks)); } catch (e) {} };
 
 const $ = (id) => document.getElementById(id);
-document.title = SITE.title;
+document.title = SITE.tabTitle || SITE.title;
 $("title").textContent = SITE.title;
 $("subtitle").textContent = SITE.subtitle;
 $("date").textContent = SITE.date;
