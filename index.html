@@ -49,11 +49,6 @@
     border: 3px solid var(--ink); border-radius: 999px; transform: rotate(-2deg);
   }
 
-  .progress { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 10px 0; }
-  .bar { height: 14px; border: 3px solid var(--ink); border-radius: 999px; overflow: hidden; background: var(--card); }
-  .bar > div { height: 100%; width: 0; background: var(--yes); transition: width .25s; }
-  .progress small { display: block; text-align: center; margin-top: 4px; font-weight: 700; }
-
   h2.section {
     margin: 28px 0 4px; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;
     display: flex; align-items: center; gap: 10px;
@@ -67,16 +62,7 @@
     box-shadow: var(--shadow);
     padding: 14px 16px 16px;
     margin: 16px 0 20px;
-    display: block;
-    width: 100%;
-    text-align: left;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-    position: relative;
-    -webkit-tap-highlight-color: transparent;
   }
-  .contest:active { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--ink); }
   .office { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; opacity: .7; }
   .vote {
     display: inline-block; margin: 6px 0 4px; padding: 4px 14px;
@@ -89,27 +75,7 @@
   .vote.skip { background: var(--skip); }
   .why { margin: 4px 0 0; font-size: 16px; }
   .why .emoji { font-size: 20px; }
-  .check {
-    position: absolute; top: 12px; right: 12px; width: 34px; height: 34px;
-    border: 3px solid var(--ink); border-radius: 50%; background: var(--card);
-    display: grid; place-items: center; font-size: 20px; font-weight: 900; color: transparent;
-  }
-  .contest.done { opacity: .55; }
-  .contest.done .check { background: var(--yes); color: #fff; }
-  .contest.done .vote { text-decoration: line-through; text-decoration-thickness: 3px; }
-
-  .done-banner {
-    display: none; text-align: center; margin: 24px 0; padding: 18px;
-    background: var(--sun); color: #1d1b2f; border: 3px solid var(--ink); border-radius: 18px;
-    box-shadow: var(--shadow); font-weight: 800; font-size: 20px;
-  }
-  .done-banner.show { display: block; }
-
   footer { text-align: center; margin-top: 32px; font-size: 14px; opacity: .8; }
-  footer button {
-    font: inherit; background: none; border: 2px solid var(--ink); color: inherit;
-    padding: 6px 14px; border-radius: 999px; cursor: pointer; margin-top: 8px;
-  }
 </style>
 </head>
 <body>
@@ -121,18 +87,10 @@
     <span class="date" id="date"></span>
   </header>
 
-  <div class="progress">
-    <div class="bar"><div id="barfill"></div></div>
-    <small id="progresstext"></small>
-  </div>
-
   <div id="ballot"></div>
-
-  <div class="done-banner" id="donebanner">🎉 All done! Go get your sticker. 🎉</div>
 
   <footer>
     <p id="footnote"></p>
-    <button id="reset" type="button">Reset my checkmarks</button>
   </footer>
 </main>
 
@@ -358,11 +316,6 @@ const BALLOT = [
 ];
 /* ============================================================ */
 
-const STORE_KEY = "vote-checks-v1";
-let checks = {};
-try { checks = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) {}
-const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(checks)); } catch (e) {} };
-
 const $ = (id) => document.getElementById(id);
 document.title = SITE.tabTitle || SITE.title;
 $("title").textContent = SITE.title;
@@ -370,8 +323,6 @@ $("subtitle").textContent = SITE.subtitle;
 $("date").textContent = SITE.date;
 $("mascot").textContent = SITE.mascot;
 $("footnote").textContent = SITE.footnote;
-
-const total = BALLOT.reduce((n, s) => n + s.items.length, 0);
 
 function el(tag, cls, text) {
   const e = document.createElement(tag);
@@ -382,36 +333,23 @@ function el(tag, cls, text) {
 
 function render() {
   const root = $("ballot");
-  root.replaceChildren();
-  BALLOT.forEach((sec, si) => {
+  BALLOT.forEach((sec) => {
     root.appendChild(el("h2", "section", sec.section));
-    sec.items.forEach((it, ii) => {
-      const key = si + "-" + ii;
-      const card = el("button", "contest" + (checks[key] ? " done" : ""));
-      card.type = "button";
-      card.setAttribute("aria-pressed", checks[key] ? "true" : "false");
+    sec.items.forEach((it) => {
+      const card = el("div", "contest");
       card.appendChild(el("div", "office", it.office));
       card.appendChild(el("div", "vote " + it.type, it.vote));
-      const why = el("p", "why");
-      if (it.emoji) why.appendChild(el("span", "emoji", it.emoji + " "));
-      why.appendChild(document.createTextNode(it.why || ""));
-      card.appendChild(why);
-      card.appendChild(el("span", "check", "✓"));
-      card.addEventListener("click", () => {
-        checks[key] = !checks[key];
-        save();
-        render();
-      });
+      if (it.why || it.emoji) {
+        const why = el("p", "why");
+        if (it.emoji) why.appendChild(el("span", "emoji", it.emoji + " "));
+        why.appendChild(document.createTextNode(it.why || ""));
+        card.appendChild(why);
+      }
       root.appendChild(card);
     });
   });
-  const done = Object.values(checks).filter(Boolean).length;
-  $("barfill").style.width = (total ? (done / total) * 100 : 0) + "%";
-  $("progresstext").textContent = done + " of " + total + " filled in";
-  $("donebanner").classList.toggle("show", done === total && total > 0);
 }
 
-$("reset").addEventListener("click", () => { checks = {}; save(); render(); });
 render();
 </script>
 </body>
